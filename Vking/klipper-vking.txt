@@ -1,0 +1,272 @@
+# This file contains common pin mappings for the BIGTREETECH SKR mini
+# E3 v1.2. To use this config, the firmware should be compiled for the
+# STM32F103 with a "28KiB bootloader". Also, select "Enable extra
+# low-level configuration options" and configure "GPIO pins to set at
+# micro-controller startup" to "!PC13".
+
+# The "make flash" command does not work on the SKR mini E3. Instead,
+# after running "make", copy the generated "out/klipper.bin" file to a
+# file named "firmware.bin" on an SD card and then restart the SKR
+# mini E3 with that SD card.
+
+# See the example.cfg file for a description of available parameters.
+
+[stepper_x]
+step_pin: PB13
+dir_pin: !PB12
+enable_pin: !PB14
+step_distance: .0125
+endstop_pin: tmc2209_stepper_x:virtual_endstop
+position_endstop: 0
+position_max: 350
+homing_speed: 35
+
+[tmc2209 stepper_x]
+uart_pin: PB15
+diag_pin: PC0
+microsteps: 16
+run_current: 1.1
+hold_current: 1.1
+stealthchop_threshold: 50
+driver_SGTHRS: 75
+
+[stepper_y]
+step_pin: PB10
+dir_pin: !PB2
+enable_pin: !PB11
+step_distance: .0125
+endstop_pin: tmc2209_stepper_y:virtual_endstop
+position_endstop: 0
+position_max: 350
+homing_speed: 50
+
+[tmc2209 stepper_y]
+uart_pin: PC6
+diag_pin: PC1
+microsteps: 16
+run_current: 1.1
+hold_current: 1.1
+stealthchop_threshold: 50
+driver_SGTHRS: 65
+
+
+#[stepper_z]
+#step_pin: PB0
+#dir_pin: PC5
+#enable_pin: !PB1
+#step_distance: 0.00125
+#endstop_pin: probe:z_virtual_endstop
+#position_endstop: -10
+#position_max: 350
+
+
+#[tmc2209 stepper_z]
+#uart_pin: PC10
+#microsteps: 32
+#run_current: 0.9
+#hold_current: 0.9
+#sense_resistor: 0.10
+#stealthchop_threshold: 50
+#interpolate: True
+
+
+[mcu genlboard]
+serial: /dev/serial/by-id/usb-1a86_USB_Serial-if00-port0
+pin_map: arduino
+
+[stepper_z]
+step_pin: genlboard:ar54
+dir_pin: !genlboard:ar55
+enable_pin: !genlboard:ar38
+step_distance: 0.00125
+position_min: -10
+position_max: 350
+endstop_pin: probe:z_virtual_endstop
+
+[stepper_z1]
+step_pin: genlboard:ar60
+dir_pin: !genlboard:ar61
+enable_pin: !genlboard:ar56
+step_distance:0.00125
+
+
+
+[extruder]
+step_pin: PB3
+dir_pin: !PB4
+enable_pin: !PD2
+step_distance: .00235
+nozzle_diameter: 0.6
+filament_diameter: 1.750
+heater_pin: PC8
+sensor_type: ATC Semitec 104GT-2
+sensor_pin: PA0
+#control: pid
+#pid_Kp: 21.527
+#pid_Ki: 1.063
+#pid_Kd: 108.982
+min_temp: 0
+max_temp: 270
+
+[tmc2209 extruder]
+uart_pin: PC11
+microsteps: 16
+run_current: 0.4
+hold_current: 0.4
+stealthchop_threshold: 50
+Interpolate: True
+
+[heater_bed]
+heater_pin: PC9
+sensor_type: ATC Semitec 104GT-2
+sensor_pin: PC3
+#control: watermark
+min_temp: 0
+max_temp: 130
+
+[fan]
+pin: PA8
+
+[mcu]
+serial: /dev/serial/by-id/usb-Klipper_stm32f103xe_31FFD8054242363122830657-if00
+
+
+[probe]
+#pin: ^!PC14
+pin:  ^!genlboard:ar3
+#   Probe detection pin. This parameter must be provided.
+z_offset: 0.444152
+x_offset: 26.0
+y_offset: 0
+#   The distance (in mm) between the bed and the nozzle when the probe
+#   triggers. This parameter must be provided.
+speed: 5.0
+
+[printer]
+kinematics: corexy
+max_velocity: 300
+max_accel: 3000
+max_z_velocity: 25
+max_z_accel: 30
+
+[bed_mesh]
+speed: 50
+horizontal_move_z: 8
+probe_count: 3,3
+fade_start: 1.0
+fade_end: 0.0
+mesh_min: 35,6
+mesh_max: 240, 198
+
+[screws_tilt_adjust]
+screw1: 10.000,199
+screw1_name: middle left screw
+screw2: 285.000,335.000
+screw2_name: rear right screw
+screw3: 285.000,10.000
+screw3_name: front right screw
+horizontal_move_z: 10.
+speed: 50.
+screw_thread: CW-M5
+
+
+
+[z_tilt]
+z_positions:120,-20
+	120,380
+#   A list of X,Y coordinates (one per line; subsequent lines
+#   indented) describing the location of each bed "pivot point". The
+#   "pivot point" is the point where the bed attaches to the given Z
+#   stepper. It is described using nozzle coordinates (the XY position
+#   of the nozzle if it could move directly above the point). The
+#   first entry corresponds to stepper_z, the second to stepper_z1,
+#   the third to stepper_z2, etc. This parameter must be provided.
+points:120,9
+	120,350
+	120,199
+#   A list of X,Y coordinates (one per line; subsequent lines
+#   indented) that should be probed during a Z_TILT_ADJUST command.
+#   Specify coordinates of the nozzle and be sure the probe is above
+#   the bed at the given nozzle coordinates. This parameter must be
+#   provided.
+#speed: 50
+#   The speed (in mm/s) of non-probing moves during the calibration.
+#   The default is 50.
+horizontal_move_z: 5
+#   The height (in mm) that the head should be commanded to move to
+#   just prior to starting a probe operation. The default is 5.
+#retries: 2
+#   Number of times to retry if the probed points aren't within
+#   tolerance.
+#retry_tolerance: 0
+#   If retries are enabled then retry if largest and smallest probed
+#   points differ more than retry_tolerance. Note the smallest unit of
+#   change here would be a single step. However if you are probing
+#   more points than steppers then you will likely have a fixed
+#   minimum value for the range of probed points which you can learn
+#   by observing command output.
+
+
+
+[homing_override]
+gcode:
+    G1 Z10 ; Move up 10mm
+    G28 X Y
+    G1 X170 Y199 F6000 ; Change the X and Y coordinates to the center of your print 
+    G28 Z0
+set_position_z: 0.0
+
+
+[static_digital_output usb_pullup_enable]
+pins: !PC13
+
+[board_pins]
+aliases:
+    # EXP1 header
+    EXP1_1=PB5, EXP1_3=PA9,   EXP1_5=PA10, EXP1_7=PB8, EXP1_9=<GND>,
+    EXP1_2=PB6, EXP1_4=<RST>, EXP1_6=PB9,  EXP1_8=PB7, EXP1_10=<5V>
+
+# See the sample-lcd.cfg file for definitions of common LCD displays.
+
+######################################################################
+# Filament Change
+######################################################################
+
+# M600: Filament Change. This macro will pause the printer, move the
+# tool to the change position, and retract the filament 50mm. Adjust
+# the retraction settings for your own extruder. After filament has
+# been changed, the print can be resumed from its previous position
+# with the "RESUME" gcode.
+
+[pause_resume]
+
+[gcode_macro M600]
+default_parameter_X: 50
+default_parameter_Y: 0
+default_parameter_Z: 10
+gcode:
+    SAVE_GCODE_STATE NAME=M600_state
+    PAUSE
+    G91
+    G1 E-.8 F2700
+    G1 Z{Z}
+    G90
+    G1 X{X} Y{Y} F3000
+    G91
+    G1 E-50 F1000
+    RESTORE_GCODE_STATE NAME=M600_state
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [extruder]
+#*# control = pid
+#*# pid_kp = 20.881
+#*# pid_ki = 0.947
+#*# pid_kd = 115.107
+#*#
+#*# [heater_bed]
+#*# control = pid
+#*# pid_kp = 64.967
+#*# pid_ki = 1.925
+#*# pid_kd = 548.159
