@@ -1,0 +1,562 @@
+[include mainsail.cfg]
+#[include stealthburner_leds.cfg]
+[include eddy.cfg]
+[include ebbcan.cfg]
+[virtual_sdcard]
+path: /home/pi/printer_data/gcodes
+on_error_gcode: CANCEL_PRINT
+
+[exclude_object] 
+
+
+
+[temperature_sensor raspberry_pi]
+sensor_type: temperature_host
+min_temp: 10
+max_temp: 100
+
+[temperature_sensor mcu_temp]
+sensor_type: temperature_mcu
+min_temp: 0
+max_temp: 100
+
+[gcode_arcs]
+#resolution: 1.0
+
+
+
+[printer]
+kinematics: corexy
+max_velocity: 500  #editied from 500
+max_accel: 9000    			#Max 4000
+max_z_velocity: 20			#Max 15 for 12V TMC Drivers, can increase for 24V
+max_z_accel: 350
+square_corner_velocity: 5.0
+
+
+
+#SKR-1.2 No-1 board XY only 
+
+[mcu]
+serial: /dev/serial/by-id/usb-Klipper_stm32f103xe_30FFD7053054483138680643-if00
+[static_digital_output usb_pullup_enable]
+pins: !PA14
+
+[stepper_x]
+step_pin: PB13
+dir_pin: PB12
+enable_pin: !PB14
+microsteps: 32  #edited from 16
+rotation_distance: 40
+endstop_pin: EBBCan:PB8
+#endstop_pin: tmc2209_stepper_x:virtual_endstop
+position_endstop: 350
+position_max: 350
+homing_speed: 80   #Max 100
+homing_retract_dist: 0
+homing_positive_dir: true
+
+[tmc2209 stepper_x]
+uart_pin: PC11
+tx_pin: PC10
+uart_address: 0
+run_current: 0.8
+stealthchop_threshold: 0
+
+
+[stepper_y]
+step_pin: PB10
+dir_pin: PB2
+enable_pin: !PB11
+microsteps: 32
+rotation_distance: 40
+endstop_pin: ^PC1
+position_endstop: 350
+position_max: 350
+homing_speed: 80
+homing_retract_dist: 0
+homing_positive_dir: true
+
+[tmc2209 stepper_y]
+uart_pin: PC11
+tx_pin: PC10
+uart_address: 2
+run_current: 0.8
+stealthchop_threshold: 0
+
+
+#[extruder]
+#step_pin: PB3
+#dir_pin: PB4
+#enable_pin: !PD2
+#microsteps: 16
+#rotation_distance: 4.5
+#nozzle_diameter: 0.400
+#filament_diameter: 1.750
+#heater_pin: EBBCan:PB13
+#sensor_type:ATC Semitec 104NT-4-R025H42G
+#sensor_pin: EBBCan:PA3
+#max_extrude_only_distance: 600 # default is 50mm
+#pressure_advance: 0.02
+#control: pid
+#pid_Kp: 21.527
+#pid_Ki: 1.063
+#pid_Kd: 108.982
+#min_temp: 0
+#max_temp: 300
+
+
+#[tmc2209 extruder]
+#uart_pin: PC11
+#tx_pin: PC10
+#uart_address: 3
+#run_current: 0.65
+#stealthchop_threshold: 0
+#stealthchop_threshold: 999999
+
+
+
+#SKR-2 No-2 board Z + heater
+[mcu zboard]
+ serial: /dev/serial/by-id/usb-Klipper_stm32f103xe_31FFD8054242363122830657-if00
+ 
+
+##	MCU for Z steppers
+##	[Z in X] - Front Left
+##	[Z1 in Y] - Rear Left
+##	[Z2 in Z] - Rear Right
+##	[Z3 in E0]- Front Right
+##	Obtain definition by "ls -l /dev/serial/by-id/" then unplug to verify
+
+
+[static_digital_output usb_pullup_enable]
+pins: !zboard:PC13
+
+[stepper_z]
+step_pin: zboard:PB13
+dir_pin: zboard:PB12
+enable_pin: !zboard:PB14
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: 32
+#endstop_pin: ^zboard:PC2
+#position_endstop: 0
+endstop_pin: probe:z_virtual_endstop
+position_max: 340
+position_min: -5
+homing_speed: 8
+homing_retract_speed: 2
+second_homing_speed: 3
+homing_retract_dist: 0.4
+
+[tmc2209 stepper_z]
+uart_pin: zboard:PB15
+run_current: 0.580
+stealthchop_threshold: 999999
+
+
+[stepper_z1]
+step_pin: zboard:PB10
+dir_pin: !zboard:PB2
+enable_pin: !zboard:PB11
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: 32
+
+[tmc2209 stepper_z1]
+uart_pin: zboard:PC6
+run_current: 0.580
+stealthchop_threshold: 999999
+
+
+
+
+[stepper_z2]
+step_pin: zboard:PB0
+dir_pin: zboard:PC5                                                      
+enable_pin: !zboard:PB1
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: 32
+
+[tmc2209 stepper_z2]
+uart_pin: zboard:PC10
+run_current: 0.580 
+stealthchop_threshold: 999999  
+
+                                      
+
+
+[stepper_z3]
+step_pin: zboard:PB3
+dir_pin: !zboard:PB4                                                       
+enable_pin: !zboard:PD2
+rotation_distance: 40
+gear_ratio: 80:16
+microsteps: 32
+
+[tmc2209 stepper_z3]
+uart_pin: zboard:PC11
+run_current: 0.580
+stealthchop_threshold: 999999
+
+
+
+
+[heater_bed]
+heater_pin: zboard:PC9
+sensor_type: ATC Semitec 104GT-2
+sensor_pin: zboard:PC3
+control: pid
+pid_Kp: 54.027
+pid_Ki: 0.770
+pid_Kd: 948.182
+min_temp: 0
+max_temp: 130
+
+
+
+[quad_gantry_level]
+##	Use QUAD_GANTRY_LEVEL to level a gantry.
+##	Min & Max gantry corners - measure from nozzle at MIN (0,0) and 
+##	MAX (250, 250), (300,300), or (350,350) depending on your printer size
+##	to respective belt positions
+speed: 150
+##	Gantry Corners for 350mm Build
+##	Uncomment for 350mm build
+gantry_corners:
+	-60,-10
+	410,420
+##	Probe points
+points:
+	20,25
+	20,300
+	300,300
+	300,25
+
+#--------------------------------------------------------------------
+horizontal_move_z: 10
+retries: 10
+retry_tolerance: 0.02 # 0.0075
+max_adjust: 10
+
+#####################################################################
+#   print_start macro
+#####################################################################
+
+[gcode_macro PRINT_START]
+gcode:
+  # This part fetches data from your slicer. Such as bed temp, extruder temp, chamber temp and size of your printer.
+  {% set target_bed = params.BED|int %}
+  {% set target_extruder = params.EXTRUDER|int %}
+  {% set x_wait = printer.toolhead.axis_maximum.x|float / 2 %}
+  {% set y_wait = printer.toolhead.axis_maximum.y|float / 2 %}
+
+  # Homes the printer, sets absolute positioning and updates the Stealthburner leds.
+  G28                   # Full home (XYZ)
+  G90                   # Absolut position
+  G1 X{x_wait} Y{y_wait} Z15 F9000                    # Goes to center of the bed
+  M190 S{target_bed}                                  # Sets the target temp for the bed
+  M109 S{target_extruder}                                       # Heats the nozzle to printing temp
+  quad_gantry_level               # Levels the buildplate via QGL
+  G28 Z                           # Homes Z again after QGL
+
+  ##  eddy bed mesh
+  BED_MESH_CALIBRATE METHOD=rapid_scan ADAPTIVE=1
+  
+  G1 X{x_wait} Y{y_wait} Z15 F9000                              # Goes to center of the bed
+  M107                                                          # Turns off partcooling fan
+  
+  
+  # Gets ready to print by doing a purge line and updating the SB-leds
+  G0 X{x_wait - 100} Y4 F10000                      # Moves to starting point
+  G0 Z0.4                                          # Raises Z to 0.4
+  G91                                              # Incremental positioning 
+  G1 X150 E20 F1000                                # Purge line
+  G90                                              # Absolut position
+
+[gcode_macro END_PRINT]
+gcode: 
+    #Get Printer built volume dimensions 
+    {% set X_MAX = printer.toolhead.axis_maximum.x|default(100)|float %}
+    {% set Y_MAX = printer.toolhead.axis_maximum.y|default(100)|float %}
+    #Fix-up extruder
+    G91                                            
+    G1 E-2 F2700                                    
+    G1 E-1.5 Z0.2 F2400                        
+    G1 X5 Y5 F6000                               
+    G1 Z10                                     
+    G90                                        
+
+    #Present print
+    G1 Z{printer.toolhead.position.z + 10} F600
+    G1 X{X_MAX / 2} Y{Y_MAX - 20} F6000
+    M106 S0                                      
+    M104 S0                                       
+    M140 S0                                 
+    SET_GCODE_OFFSET Z=0
+
+    M300 S1 P5000
+    #Disable Steppers
+    M84 X Y Z E
+   
+
+[gcode_macro LOAD_FILAMENT]
+# still to test 
+variable_load_distance:  100
+variable_purge_distance:  25
+gcode:
+    {% set speed = params.SPEED|default(300) %}
+    {% set max_velocity = printer.configfile.settings['extruder'].max_extrude_only_velocity  * 60 %}
+    SAVE_GCODE_STATE NAME=load_state
+    G91
+    G92 E0
+    G1 E{load_distance} F{max_velocity} # fast-load
+    G1 E{purge_distance} F{speed} # purge
+    RESTORE_GCODE_STATE NAME=load_state
+
+[gcode_macro UNLOAD_FILAMENT]
+variable_unload_distance:  100
+variable_purge_distance:  25
+gcode:
+    {% set speed = params.SPEED|default(300) %}
+    {% set max_velocity = printer.configfile.settings['extruder'].max_extrude_only_velocity  * 60 %}
+    SAVE_GCODE_STATE NAME=unload_state
+    G91
+    G92 E0
+    G1 E{purge_distance} F{speed} # purge
+    G1 E-{unload_distance} F{max_velocity} # fast-unload
+    RESTORE_GCODE_STATE NAME=unload_state
+
+[gcode_macro PAUSE]
+description: Pause the actual running print
+rename_existing: PAUSE_BASE
+gcode:
+  PAUSE_BASE
+  _TOOLHEAD_PARK_PAUSE_CANCEL
+
+
+[gcode_macro RESUME]
+description: Resume the actual running print
+rename_existing: RESUME_BASE
+gcode:
+  ##### read extrude from  _TOOLHEAD_PARK_PAUSE_CANCEL  macro #####
+
+  {% set extrude = printer['gcode_macro _TOOLHEAD_PARK_PAUSE_CANCEL'].extrude %}
+  #### get VELOCITY parameter if specified ####
+  {% if 'VELOCITY' in params|upper %}
+    {% set get_params = ('VELOCITY=' + params.VELOCITY)  %}
+  {%else %}
+    {% set get_params = "" %}
+  {% endif %}
+  ##### end of definitions #####
+  {% if printer.extruder.can_extrude|lower == 'true' %}
+    M83
+    G1 E{extrude} F2100
+    {% if printer.gcode_move.absolute_extrude |lower == 'true' %} M82 {% endif %}
+  {% else %}
+    {action_respond_info("Extruder not hot enough")}
+  {% endif %}
+
+  RESUME_BASE {get_params}
+
+[gcode_macro _TOOLHEAD_PARK_PAUSE_CANCEL]
+description: Helper: park toolhead used in PAUSE and CANCEL_PRINT
+variable_extrude: 1.0
+gcode:
+  ##### set park positon for x and y #####
+  # default is your max posion from your printer.cfg
+
+  {% set x_park = printer.toolhead.axis_maximum.x|float - 5.0 %}
+  {% set y_park = printer.toolhead.axis_maximum.y|float - 5.0 %}
+  {% set z_park_delta = 2.0 %}
+  ##### calculate save lift position #####
+  {% set max_z = printer.toolhead.axis_maximum.z|float %}
+  {% set act_z = printer.toolhead.position.z|float %}
+  {% if act_z < (max_z - z_park_delta) %}
+    {% set z_safe = z_park_delta %}
+  {% else %}
+    {% set z_safe = max_z - act_z %}
+  {% endif %}
+  ##### end of definitions #####
+  {% if printer.extruder.can_extrude|lower == 'true' %}
+    M83
+    G1 E-{extrude} F2100
+    {% if printer.gcode_move.absolute_extrude |lower == 'true' %} M82 {% endif %}
+  {% else %}
+    {action_respond_info("Extruder not hot enough")}
+  {% endif %}
+  {% if "xyz" in printer.toolhead.homed_axes %}
+    G91
+    G1 Z{z_safe} F900
+    G90
+    G1 X{x_park} Y{y_park} F6000
+    {% if printer.gcode_move.absolute_coordinates|lower == 'false' %} G91 {% endif %}
+  {% else %}
+    {action_respond_info("Printer not homed")}
+  {% endif %}
+
+[gcode_macro CANCEL_PRINT]
+description: Cancel the actual running print
+rename_existing: CANCEL_PRINT_BASE
+variable_park: True
+gcode:
+  ## Move head and retract only if not already in the pause state and park set to true
+
+  {% if printer.pause_resume.is_paused|lower == 'false' and park|lower == 'true'%}
+    _TOOLHEAD_PARK_PAUSE_CANCEL
+  {% endif %}
+
+  TURN_OFF_HEATERS
+  CANCEL_PRINT_BASE
+
+
+
+
+[shaketune]
+# result_folder: ~/printer_data/config/ShakeTune_results
+#    Path where the processed results will be stored. If the folder doesn't exist,
+#    it will be automatically created. You can change this if you'd like to store 
+#    results in a different location.
+# number_of_results_to_keep: 10
+#    This setting defines how many results you want to keep in the result folder.
+#    Once the specified number is exceeded, older results will be automatically deleted
+#    to free up space on the SD card and avoid cluttering the results folder.
+# keep_raw_data: False
+#    If set to True, Shake&Tune will store both the processed graphs and the raw accelerometer
+#    .stdata files in the results folder. This can be useful for debugging or archiving purposes.
+#    Please always attach them when reporting any issues on GitHub or Discord.
+# show_macros_in_webui: True
+#    Mainsail and Fluidd doesn't create buttons for system commands (macros that are not part
+#    of the printer.cfg file). This option allow Shake&Tune to inject them into the webui at runtime.
+#    If set to False, the macros will be hidden but still accessible from the console by typing
+#    their names manually, which can be useful if you prefer to encapsulate them into your own macros.
+# timeout: 600
+#    This defines the maximum processing time (in seconds) to allows to Shake&Tune for generating 
+#    graphs from a .stdata file. 10 minutes should be more than enough in most cases, but if you have
+#    slower hardware (e.g., older SD cards or low-performance devices), increase it to prevent timeouts.
+# measurements_chunk_size: 2
+#    Each Shake&Tune command uses the accelerometer to take multiple measurements. By default,
+#    Shake&Tune will write a chunk of data to disk every two measurements, and at the end of the
+#    command will merge these chunks into the final .stdata file for processing. "2" is a very
+#    conservative setting to avoid Klipper Timer Too Close errors on lower end devices with little
+#    RAM, and should work for everyone. However, if you are using a powerful computer, you may
+#    wish to increase this value to keep more measurements in memory (e.g., 15-20) before writing
+#    the chunk and avoid stressing the filesystem too much.
+# max_freq: 200
+#    This setting defines the maximum frequency at which the calculation of the power spectral density
+#    is cutoff. The default value should be fine for most machines and accelerometer combinations and
+#    avoid touching it unless you know what you're doing.
+# dpi: 300
+#    Controls the resolution of the generated graphs. The default value of 300 dpi was optimized
+#    and strikes a balance between performance and readability, ensuring that graphs are clear
+#    without using too much RAM to generate them. Usually, you shouldn't need to change this value.
+
+[include moonraker_obico_macros.cfg]
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [input_shaper]
+#*#
+#*# [extruder]
+#*# reg_drive_current = 15
+#*# calibrate =
+#*# 	0.050000:3190662.854,0.090000:3189900.411,0.130000:3189033.548,
+#*# 	0.170000:3188124.300,0.210000:3187275.421,0.250000:3186476.449,
+#*# 	0.290000:3185614.926,0.330000:3184765.660,0.370000:3183971.613,
+#*# 	0.410000:3183165.042,0.450000:3182347.690,0.490000:3181545.586,
+#*# 	0.530000:3180763.271,0.570000:3180026.255,0.610000:3179300.813,
+#*# 	0.650000:3178540.256,0.690000:3177810.144,0.730000:3177116.679,
+#*# 	0.770000:3176391.293,0.810000:3175675.011,0.850000:3174967.763,
+#*# 	0.890000:3174303.953,0.930000:3173660.299,0.970000:3172932.393,
+#*# 	1.010000:3172275.696,1.050000:3171641.892,1.090000:3171030.351,
+#*# 	1.130000:3170389.833,1.170000:3169768.773,1.210000:3169161.413,
+#*# 	1.250000:3168577.158,1.290000:3168004.869,1.330000:3167400.507,
+#*# 	1.370000:3166870.597,1.410000:3166340.331,1.450000:3165795.443,
+#*# 	1.490000:3165245.744,1.530000:3164733.503,1.570000:3164189.525,
+#*# 	1.610000:3163651.218,1.650000:3163150.555,1.690000:3162685.169,
+#*# 	1.730000:3162199.850,1.770000:3161704.171,1.810000:3161227.859,
+#*# 	1.850000:3160808.415,1.890000:3160353.645,1.930000:3159901.945,
+#*# 	1.970000:3159463.214,2.010000:3159058.320,2.050000:3158619.606,
+#*# 	2.090000:3158196.356,2.130000:3157794.260,2.170000:3157423.348,
+#*# 	2.210000:3157034.956,2.250000:3156613.575,2.290000:3156238.788,
+#*# 	2.330000:3155876.487,2.370000:3155503.934,2.410000:3155149.797,
+#*# 	2.450000:3154776.938,2.490000:3154453.574,2.530000:3154118.047,
+#*# 	2.570000:3153761.661,2.610000:3153431.934,2.650000:3153124.670,
+#*# 	2.690000:3152796.657,2.730000:3152470.376,2.770000:3152156.559,
+#*# 	2.810000:3151880.279,2.850000:3151612.502,2.890000:3151261.532,
+#*# 	2.930000:3150975.946,2.970000:3150704.446,3.010000:3150421.794,
+#*# 	3.050000:3150142.758,3.090000:3149889.230,3.130000:3149630.880,
+#*# 	3.170000:3149367.444,3.210000:3149112.037,3.250000:3148850.320,
+#*# 	3.290000:3148617.253,3.330000:3148356.428,3.370000:3148115.582,
+#*# 	3.410000:3147884.496,3.450000:3147642.791,3.490000:3147421.097,
+#*# 	3.530000:3147185.283,3.570000:3146962.833,3.610000:3146754.241,
+#*# 	3.650000:3146542.691,3.690000:3146320.585,3.730000:3146120.047,
+#*# 	3.770000:3145922.731,3.810000:3145710.539,3.850000:3145516.019,
+#*# 	3.890000:3145313.346,3.930000:3145127.677,3.970000:3144966.003,
+#*# 	4.010000:3144737.622,4.050000:3144559.546
+#*#
+#*# [bed_mesh default]
+#*# version = 1
+#*# points =
+#*# 	0.003077, 0.026048, 0.031162, 0.043233, 0.045582, 0.059172, 0.057439, 0.023710, -0.026711
+#*# 	0.006117, 0.014885, 0.040006, 0.048018, 0.061412, 0.082981, 0.088962, 0.070483, 0.006526
+#*# 	0.052440, 0.069233, 0.077932, 0.083322, 0.088195, 0.102987, 0.106315, 0.079251, 0.033788
+#*# 	0.047889, 0.049044, 0.061860, 0.068206, 0.074951, 0.085446, 0.088482, 0.071799, 0.021022
+#*# 	0.022482, 0.024062, 0.033831, 0.034749, 0.041415, 0.056928, 0.059936, 0.041929, 0.007168
+#*# 	0.023652, 0.028329, 0.029906, 0.042504, 0.042121, 0.059234, 0.064553, 0.052311, 0.000622
+#*# 	0.003896, 0.014242, 0.020204, 0.022133, 0.024294, 0.033852, 0.044684, 0.019874, -0.009255
+#*# 	0.001850, 0.012723, 0.017048, 0.017340, 0.021139, 0.029731, 0.039943, 0.018081, -0.024675
+#*# 	0.000155, 0.012781, 0.018158, 0.012723, 0.017808, 0.022445, 0.029029, 0.004480, -0.023274
+#*# x_count = 9
+#*# y_count = 9
+#*# mesh_x_pps = 2
+#*# mesh_y_pps = 2
+#*# algo = bicubic
+#*# tension = 0.2
+#*# min_x = 30.0
+#*# max_x = 320.0
+#*# min_y = 30.0
+#*# max_y = 320.0
+#*#
+#*# [probe_eddy_current btt_eddy]
+#*# reg_drive_current = 15
+#*# calibrate =
+#*# 	0.050000:3226350.006,0.090000:3224761.990,0.130000:3223152.920,
+#*# 	0.170000:3221576.475,0.210000:3220033.069,0.250000:3218529.491,
+#*# 	0.290000:3217088.218,0.330000:3215632.757,0.370000:3214227.641,
+#*# 	0.410000:3212853.177,0.450000:3211507.199,0.490000:3210186.165,
+#*# 	0.530000:3208919.651,0.570000:3207699.652,0.610000:3206477.571,
+#*# 	0.650000:3205246.797,0.690000:3204147.855,0.730000:3203001.975,
+#*# 	0.770000:3201858.056,0.810000:3200763.373,0.850000:3199709.675,
+#*# 	0.890000:3198600.563,0.930000:3197576.707,0.970000:3196567.011,
+#*# 	1.010000:3195633.963,1.050000:3194631.885,1.090000:3193643.750,
+#*# 	1.130000:3192673.327,1.170000:3191801.888,1.210000:3190879.081,
+#*# 	1.250000:3189954.201,1.290000:3189070.299,1.330000:3188249.400,
+#*# 	1.370000:3187359.138,1.410000:3186514.458,1.450000:3185663.915,
+#*# 	1.490000:3184862.991,1.530000:3184034.285,1.570000:3183223.794,
+#*# 	1.610000:3182395.086,1.650000:3181644.065,1.690000:3180836.654,
+#*# 	1.730000:3180058.329,1.770000:3179301.367,1.810000:3178574.441,
+#*# 	1.850000:3177802.909,1.890000:3177075.723,1.930000:3176330.931,
+#*# 	1.970000:3175670.509,2.010000:3174950.248,2.050000:3174285.978,
+#*# 	2.090000:3173578.582,2.130000:3172939.171,2.170000:3172308.092,
+#*# 	2.210000:3171635.669,2.250000:3170979.005,2.290000:3170385.450,
+#*# 	2.330000:3169761.926,2.370000:3169112.388,2.410000:3168519.419,
+#*# 	2.450000:3167945.137,2.490000:3167336.492,2.530000:3166766.925,
+#*# 	2.570000:3166187.851,2.610000:3165656.054,2.650000:3165121.434,
+#*# 	2.690000:3164572.261,2.730000:3164020.080,2.770000:3163529.595,
+#*# 	2.810000:3162987.786,2.850000:3162515.151,2.890000:3161979.299,
+#*# 	2.930000:3161511.882,2.970000:3161043.139,3.010000:3160568.428,
+#*# 	3.050000:3160098.130,3.090000:3159676.287,3.130000:3159226.704,
+#*# 	3.170000:3158758.208,3.210000:3158345.911,3.250000:3157887.992,
+#*# 	3.290000:3157528.528,3.330000:3157098.895,3.370000:3156704.998,
+#*# 	3.410000:3156322.680,3.450000:3155933.091,3.490000:3155531.510,
+#*# 	3.530000:3155178.715,3.570000:3154824.644,3.610000:3154465.644,
+#*# 	3.650000:3154084.311,3.690000:3153733.467,3.730000:3153395.015,
+#*# 	3.770000:3153038.522,3.810000:3152723.281,3.850000:3152393.913,
+#*# 	3.890000:3152092.995,3.930000:3151771.542,3.970000:3151450.489,
+#*# 	4.010000:3151142.382,4.050000:3150847.759
+#*#
+#*# [temperature_probe btt_eddy]
+#*# calibration_temp = 51.558241
